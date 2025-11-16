@@ -7,7 +7,6 @@ export default function Buscador() {
 
     const manejarCambio = (event) => {
         setTexto(event.target.value); // Actualiza el texto
-        console.log(event.target.value); // Muestra el valor actualizado en la consola
     };
 
     return (
@@ -17,7 +16,7 @@ export default function Buscador() {
                 id="caja"
                 value={texto}
                 onChange={manejarCambio} // Cada vez que hay un cambio
-                placeholder="Buscar" // Texto indicativo
+                placeholder="Buscar..." // Texto indicativo
             />
             <Api texto={texto} />
         </div>

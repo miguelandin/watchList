@@ -5,6 +5,14 @@
   text-align: center;
 }
 
+:root{
+    --morado-ztmy: #C537A6;
+    --verde-ztmy: #89E9A1;
+    --gris-web: #1F1F1F;
+    --gris-hover: #313131;
+    --fondo-web: #242424;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
