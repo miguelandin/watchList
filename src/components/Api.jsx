@@ -29,17 +29,6 @@ export default function Api({ texto }) {
         localStorage.setItem('favoritas', JSON.stringify(seriesActualizadas))
     }
 
-    function obtenerSerieDelLocalStorage(id) {
-        // Obtener el array del localStorage
-        const seriesGuardadas = JSON.parse(localStorage.getItem('favoritas')) || []
-
-        // Buscar la serie con el ID especificado
-        const serieEncontrada = seriesGuardadas.find(serie => serie.id === id)
-
-        // Retornar el objeto si se encuentra, o null si no existe
-        return serieEncontrada || null
-    }
-
     function esFavorita(id) {
         // Obtener el array del localStorage
         const seriesGuardadas = JSON.parse(localStorage.getItem('favoritas')) || []
@@ -66,7 +55,7 @@ export default function Api({ texto }) {
     }, [texto])
 
     function handleClick(item) {
-        setSerieExpandida(serieExpandida && serieExpandida.id === item.show.id ? null : item.show)
+        setSerieExpandida(serieExpandida && serieExpandida.id === item.id ? null : item)
     }
 
     function handleStar(item) {
@@ -82,10 +71,11 @@ export default function Api({ texto }) {
         }
     }
 
+    // muestra las serie que salen en la búsqueda
     function mostrarSerie() {
         return resultados.slice(0, 3).map((item, index) => (
             <div className="todo" key={item.show.id || index}>
-                <div className="show" onClick={() => handleClick(item)}>
+                <div className="show" onClick={() => handleClick(item.show)}>
                     <img
                         className="image"
                         src={item.show.image?.medium || '/placeholder-image.png'}
@@ -114,5 +104,50 @@ export default function Api({ texto }) {
         ))
     }
 
-    return <div className="shows">{resultados.length > 0 ? mostrarSerie() : null}</div>
+    const listaFavoritas = JSON.parse(localStorage.getItem('favoritas')) || [] // array de series del localStorage
+
+    // muestra los favoritos (se que es una chapuza, lo arreglaré más tarde)
+    function mostarFavorito() {
+        return listaFavoritas.map((item, index) => (
+            <div className="todo" key={item.id || index}>
+                <div className="show" onClick={() => handleClick(item)}>
+                    <img
+                        className="image"
+                        src={item.image?.medium || '/placeholder-image.png'}
+                        alt={"(▰˘︹˘▰)✿...."}
+                    />
+                    <div className="info">
+                        <h2 className="title">{item.name}</h2>
+                        {item.premiered != null && (
+                            <h4 className="year">{item.premiered.slice(0, 4)}</h4>
+                        )}
+                    </div>
+                </div>
+                {serieExpandida && serieExpandida.id === item.id && (
+                    <div className="expanded-info">
+                        <p>Géneros: {item.genres?.join(', ') || 'No disponible'}</p>
+                        <p>Puntuación: {item.rating?.average || 'N/A'}</p>
+                        {item.webChannel && (<p>Disponible en <strong>{item.webChannel.name}</strong></p>)}
+                        <img
+                            className="star"
+                            src={esFavorita(item.id) ? '/star(1).png' : '/star.png'}
+                            onClick={handleStar(item)}
+                        />
+                    </div>
+                )}
+            </div>
+        ))
+    }
+
+    return (<div className='web'>
+        <div className="shows">{resultados.length > 0 ? <>
+            <h1>Encontrados</h1>
+            {mostrarSerie()}
+        </> : null}</div>
+        <hr />
+        <div className="favoritos">{listaFavoritas.length > 0 ? <>
+            <h1>Favoritos</h1>
+            {mostarFavorito()}
+        </> : null}</div>
+    </div>)
 }
