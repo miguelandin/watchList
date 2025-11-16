@@ -4,6 +4,7 @@ import './Api.css'
 export default function Api({ texto }) {
     const [resultados, setResultados] = useState([])
     const [serieExpandida, setSerieExpandida] = useState(null)
+    const [favoritosUpdated, setFavoritosUpdated] = useState(0) // Para forzar el re-render
 
     //funciones para el localStorage (las series favoritas)
     function agregarAlLocalStorage(serie) {
@@ -76,6 +77,8 @@ export default function Api({ texto }) {
             } else {
                 agregarAlLocalStorage(item)
             }
+
+            setFavoritosUpdated(prev => prev + 1) // forzar re-render
         }
     }
 
