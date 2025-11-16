@@ -4,25 +4,50 @@ import './Api.css'
 export default function Api({ texto }) {
     const [resultados, setResultados] = useState([])
     const [serieExpandida, setSerieExpandida] = useState(null)
-    const [favoritas, setFavoritas] = useState([])
 
-    useEffect(() => {
-        const favoritasGuardadas = localStorage.getItem('seriesFavoritas')
-        if (favoritasGuardadas) {
-            try {
-                setFavoritas(JSON.parse(favoritasGuardadas))
-            } catch (error) {
-                console.error('Error al cargar favoritas:', error)
-                localStorage.removeItem('seriesFavoritas')
-            }
-        }
-    }, [])
+    //funciones para el localStorage (las series favoritas)
+    function agregarAlLocalStorage(serie) {
+        // Obtener el array actual del localStorage o crear uno nuevo
+        const listaLocal = JSON.parse(localStorage.getItem('favoritas')) || []
 
-    // Guardar en localStorage cuando cambien las favoritas
-    useEffect(() => {
-        localStorage.setItem('seriesFavoritas', JSON.stringify(favoritas))
-    }, [favoritas])
+        // Agregar el nuevo objeto al array
+        listaLocal.push(serie)
 
+        // Guardar el array actualizado en el localStorage
+        localStorage.setItem('favoritas', JSON.stringify(listaLocal))
+    }
+
+    function eliminarAlLocalStorage(id) {
+        // Obtener el array del localStorage
+        const seriesGuardadas = JSON.parse(localStorage.getItem('favoritas')) || []
+
+        // Filtrar el array para excluir la serie con el ID especificado
+        const seriesActualizadas = seriesGuardadas.filter(serie => serie.id !== id)
+
+        // Guardar el array actualizado en el localStorage
+        localStorage.setItem('favoritas', JSON.stringify(seriesActualizadas))
+    }
+
+    function obtenerSerieDelLocalStorage(id) {
+        // Obtener el array del localStorage
+        const seriesGuardadas = JSON.parse(localStorage.getItem('favoritas')) || []
+
+        // Buscar la serie con el ID especificado
+        const serieEncontrada = seriesGuardadas.find(serie => serie.id === id)
+
+        // Retornar el objeto si se encuentra, o null si no existe
+        return serieEncontrada || null
+    }
+
+    function esFavorita(id) {
+        // Obtener el array del localStorage
+        const seriesGuardadas = JSON.parse(localStorage.getItem('favoritas')) || []
+
+        // Verificar si existe alguna serie con el ID especificado
+        return seriesGuardadas.some(serie => serie.id === id)
+    }
+
+    // fetch a la API
     useEffect(() => {
         if (texto) {
             fetch(`https://api.tvmaze.com/search/shows?q=${texto}`)
@@ -40,26 +65,18 @@ export default function Api({ texto }) {
     }, [texto])
 
     function handleClick(item) {
-        setSerieExpandida(serieExpandida && serieExpandida.id === item.show.id ? null : item.show);
+        setSerieExpandida(serieExpandida && serieExpandida.id === item.show.id ? null : item.show)
     }
 
     function handleStar(item) {
         return (e) => {
-            e.stopPropagation(); // Importante: evitar que el click se propague
+            e.stopPropagation() // evitar que el click se propague
             if (esFavorita(item.id)) {
-                eliminarSerieFavorita(item.id);
+                eliminarAlLocalStorage(item.id)
             } else {
-                setFavoritas(prev => [...prev, item]);
+                agregarAlLocalStorage(item)
             }
-        };
-    }
-
-    function eliminarSerieFavorita(serieId) {
-        setFavoritas(prev => prev.filter(fav => fav.id !== serieId));
-    }
-
-    function esFavorita(serieId) {
-        return favoritas.some(fav => fav.id === serieId);
+        }
     }
 
     function mostrarSerie() {
@@ -91,8 +108,8 @@ export default function Api({ texto }) {
                     </div>
                 )}
             </div>
-        ));
+        ))
     }
 
-    return <div className="shows">{resultados.length > 0 ? mostrarSerie() : null}</div>;
+    return <div className="shows">{resultados.length > 0 ? mostrarSerie() : null}</div>
 }
